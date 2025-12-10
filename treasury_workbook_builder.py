@@ -24,6 +24,20 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import calendar
 
+def parse_date(date_str):
+    """Convert date string to datetime object for proper Excel date handling"""
+    if isinstance(date_str, datetime):
+        return date_str
+    if isinstance(date_str, str):
+        try:
+            return datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
+            try:
+                return datetime.strptime(date_str, '%d-%m-%Y')
+            except ValueError:
+                return date_str
+    return date_str
+
 # ============================================================================
 # STYLE DEFINITIONS - Professional Treasury Theme
 # ============================================================================
@@ -624,8 +638,8 @@ class TreasuryWorkbookBuilder:
                 cell = ws.cell(row=row, column=col)
                 if isinstance(value, str) and value.startswith('='):
                     cell.value = value.format(r=row)
-                elif col == 8 and isinstance(value, str):  # Date column
-                    cell.value = value
+                elif col == 8:  # Date column - convert to actual date
+                    cell.value = parse_date(value)
                     cell.number_format = 'YYYY-MM-DD'
                 else:
                     cell.value = value
